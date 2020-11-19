@@ -164,7 +164,7 @@ if (params.fasta){
         val alignmetTool from IN_alignment_reads
 
         output:
-        "*_rgi_bwt*"
+        file("*_rgi_bwt*")
 
         script:
         """
