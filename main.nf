@@ -21,15 +21,48 @@ if (params.fasta){
         val alignmetTool from IN_alignment_fasta
 
         output:
-        file("*card_rgi*")
+        file("*card_rgi.json") into OUT_RGI_JSON
+        file("*card_rgi.txt") into OUT_RGI_TXT
 
         script:
         """
         # Place card_rgi source in a read/write location for container
         mkdir card_temp && cp -r /opt/conda/lib/python3.6/site-packages/app/ card_temp
         export PYTHONPATH="\$(pwd)/card_temp/:\$PATH"
-        rgi main --input_sequence ${fasta} --output_file ${sample_id}_card_rgi --input_type contig --alignment_tool ${alignmetTool} --low_quality --include_loose -d wgs --clean
-        rgi parser -i ${sample_id}_card_rgi.json -o parsed_${sample_id}_card_rgi -t contig
+        rgi main --input_sequence ${fasta} --output_file ${sample_id}_card_rgi --input_type contig --alignment_tool ${alignmetTool} --low_quality --include_loose -d wgs --clean -n $task.cpus
+        """
+    }
+
+    /*
+    process PROCESS_RGI_JSON{
+
+        publishDir "results/rgi_fasta/"
+
+        input:
+
+        output:
+
+        script:
+        """
+        rgi parser -i ${json_file} -o parsed_${json_file} -t contig
+        """
+    }
+    */
+
+    process PROCESS_RGI_HEATMAP {
+
+        publishDir "results/rgi_fasta/"
+
+        input:
+        file JSON_FILES from OUT_RGI_JSON.collect()
+
+        output:
+        file("*.png") optional true
+        file(".svg") optional true
+
+        script:
+        """
+        rgi heatmap -i . --category drug_class --cluster both --debug
         """
 
     }
