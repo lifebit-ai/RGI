@@ -164,7 +164,8 @@ if (params.fasta){
         val alignmetTool from IN_alignment_reads
 
         output:
-        file("*_rgi_bwt*")
+        file("*_mapping_data.txt")
+        file("*mapping_stats.txt")
         set sample_id, file("*.json") into OUT_RGI_JSON_BWT
 
         script:
@@ -174,8 +175,6 @@ if (params.fasta){
         export PYTHONPATH="\$(pwd)/card_temp/:\$PATH"
         
         rgi bwt --read_one ${fastq_pair[0]} --read_two ${fastq_pair[0]} --output_file ${sample_id}_rgi_bwt --aligner ${alignmetTool} --clean
-       
-        rgi parser -i ${sample_id}_rgi_bwt.allele_mapping_data.json -o ${sample_id} --include_loose -t read
         """
     }
 }
