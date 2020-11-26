@@ -46,7 +46,7 @@ if (params.fasta){
     process RGI_FASTA{
 
         tag { sample_id }
-        publishDir "results/rgi_fasta/", pattern: "txt"
+        publishDir "results/rgi_fasta/", pattern: "*.txt"
 
         input:
         set sample_id, file(fasta) from  IN_fasta_raw
