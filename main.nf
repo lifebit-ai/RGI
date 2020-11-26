@@ -32,40 +32,6 @@ if (params.fasta){
         rgi main --input_sequence ${fasta} --output_file ${sample_id}_card_rgi --input_type contig --alignment_tool ${alignmetTool} --low_quality --include_loose -d wgs --clean -n $task.cpus
         """
     }
-
-    /*
-    process PROCESS_RGI_JSON{
-
-        publishDir "results/rgi_fasta/"
-
-        input:
-
-        output:
-
-        script:
-        """
-        rgi parser -i ${json_file} -o parsed_${json_file} -t contig
-        """
-    }
-    */
-
-    process PROCESS_RGI_HEATMAP {
-
-        publishDir "results/rgi_fasta/"
-
-        input:
-        file JSON_FILES from OUT_RGI_JSON.collect()
-
-        output:
-        file("*.png") optional true
-        file(".svg") optional true
-
-        script:
-        """
-        rgi heatmap -i . --category drug_class --cluster both --debug
-        """
-
-    }
     
 
 } else {
@@ -165,6 +131,7 @@ if (params.fasta){
 
         output:
         file("*_rgi_bwt*")
+        file("*.json") into OUT_RGI_JSON_BWT
 
         script:
         """
@@ -175,3 +142,23 @@ if (params.fasta){
         """
     }
 }
+
+OUT_RGI_JSON.mix(OUT_RGI_JSON_BWT).set{TO_HEATMAP}
+
+process PROCESS_RGI_HEATMAP {
+
+        publishDir "results/rgi_fasta/"
+
+        input:
+        file JSON_FILES from TO_HEATMAP.collect()
+
+        output:
+        file("*.png") optional true
+        file(".svg") optional true
+
+        script:
+        """
+        rgi heatmap -i . --category drug_class --cluster both --debug
+        """
+
+    }
