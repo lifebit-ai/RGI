@@ -131,7 +131,7 @@ if (params.fasta){
 
         output:
         file("*_rgi_bwt*")
-        file("*.json") into OUT_RGI_JSON_BWT
+        file("*.json") into OUT_RGI_JSON
 
         script:
         """
@@ -143,7 +143,7 @@ if (params.fasta){
     }
 }
 
-OUT_RGI_JSON.mix(OUT_RGI_JSON_BWT).set{TO_HEATMAP}
+OUT_RGI_JSON.set{TO_HEATMAP}
 
 process PROCESS_RGI_HEATMAP {
 
