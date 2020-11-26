@@ -1,5 +1,37 @@
 #!/usr/bin/env nextflow
 
+def helpMessage() {
+    log.info """
+    Usage:
+    The typical command for running the pipeline is as follows:
+    nextflow run main.nf --fasta sample.fasta [Options]
+    
+    Inputs Options:
+    --fastq             Path expression to fastq files.
+                        Input type: path (default: $params.fastq)
+    --fasta             Path expression to fasta files.
+                        Input type: string (default: $params.fasta)
+    --accessions        Path file with accessions, one perline.
+                        Input type: path (default: $params.accessions)
+    
+    FastqDump Options:
+    --compress_fastq    If true, downloaded fastqs will be compressed. 
+                        Input tupe: boolean (default: $params.compress_fastq)
+    
+    RGI Options: 
+    --alignmentFasta    Specify alignment tool. Options: {DIAMOND,BLAST}
+                        Input type: string (default: $params.alignmentFasta)
+    --alignmentReads    Specify alignment tool. Options: {bowtie2,bwa,kma}
+                        Input type: numeric (default: $params.alignmentReads)
+    """.stripIndent()
+}
+
+// Show help message
+if (params.help) {
+  helpMessage()
+  exit 0
+}
+
 // MAIN PARAMETERS
 
 if (!params.accessions && !params.fastq && !params.fasta){ exit 1, "'accessions', 'fasta' or 'fastq' parameter missing" }
@@ -14,25 +46,27 @@ if (params.fasta){
     process RGI_FASTA{
 
         tag { sample_id }
-        publishDir "results/rgi_fasta/"
+        publishDir "results/rgi_fasta/", pattern: "txt"
 
         input:
         set sample_id, file(fasta) from  IN_fasta_raw
         val alignmetTool from IN_alignment_fasta
 
         output:
-        file("*card_rgi.json") into OUT_RGI_JSON
-        file("*card_rgi.txt") into OUT_RGI_TXT
+        file("*card_rgi.txt")
+        set sample_id, file("*_card_rgi_parsed*.json") into OUT_RGI_FASTA
 
         script:
         """
         # Place card_rgi source in a read/write location for container
         mkdir card_temp && cp -r /opt/conda/lib/python3.6/site-packages/app/ card_temp
         export PYTHONPATH="\$(pwd)/card_temp/:\$PATH"
+        
         rgi main --input_sequence ${fasta} --output_file ${sample_id}_card_rgi --input_type contig --alignment_tool ${alignmetTool} --low_quality --include_loose -d wgs --clean -n $task.cpus
+        
+        rgi parser -i ${sample_id}_card_rgi.json -o ${sample_id}_card_rgi_parsed --include_loose -t contig
         """
     }
-    
 
 } else {
 
@@ -131,20 +165,24 @@ if (params.fasta){
 
         output:
         file("*_rgi_bwt*")
-        file("*.json") into OUT_RGI_JSON
+        set sample_id, file("*.json") into OUT_RGI_JSON_BWT
 
         script:
         """
         # Place card_rgi source in a read/write location for container
         mkdir card_temp && cp -r /opt/conda/lib/python3.6/site-packages/app/ card_temp
         export PYTHONPATH="\$(pwd)/card_temp/:\$PATH"
+        
         rgi bwt --read_one ${fastq_pair[0]} --read_two ${fastq_pair[0]} --output_file ${sample_id}_rgi_bwt --aligner ${alignmetTool} --clean
+       
+        rgi parser -i ${sample_id}_rgi_bwt.allele_mapping_data.json -o ${sample_id} --include_loose -t read
         """
     }
 }
 
-OUT_RGI_JSON.set{TO_HEATMAP}
+//OUT_RGI_JSON.set{TO_PARSE}
 
+/*
 process PROCESS_RGI_HEATMAP {
 
         publishDir "results/rgi_fasta/"
@@ -160,5 +198,21 @@ process PROCESS_RGI_HEATMAP {
         """
         rgi heatmap -i . --category drug_class --cluster both --debug
         """
+}
+*/
 
-    }
+/*
+process report {
+
+    publishDir "${params.outdir}/MultiQC", mode: 'copy'
+
+    input:
+    file json_files from OUT_RGI_PARSE.collect()
+    
+    output:
+    file "multiqc_report.html"
+
+    script:
+    template "generate_report.py"
+}
+*/
