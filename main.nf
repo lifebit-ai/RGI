@@ -54,7 +54,7 @@ if (params.fasta){
 
         output:
         file("*card_rgi.txt")
-        set sample_id, file("*_card_rgi_parsed*.json") into OUT_RGI_FASTA
+        file("*_card_rgi_parsed*.json") into OUT_RGI_FASTA
 
         script:
         """
@@ -68,6 +68,26 @@ if (params.fasta){
         """
     }
 
+    /*
+    process PROCESS_RGI_HEATMAP {
+
+        publishDir "results/rgi_fasta/"
+
+        input:
+        file JSON_FILES from OUT_RGI_FASTA.collect()
+
+        output:
+        file("*.png") optional true
+        file(".svg") optional true
+
+        script:
+        """
+        rgi heatmap -i . --category drug_class --cluster both --debug
+        """
+    }
+    */
+
+
 } else {
 
     if (params.accessions){
@@ -76,47 +96,36 @@ if (params.fasta){
         process fasterqDump {
 
         tag { accession_id }
+        publishDir "reads/${accession_id}/", pattern: "*.fastq*"
         maxRetries 1
 
         input:
         val accession_id from IN_accessions_raw.splitText(){ it.trim() }.filter{ it.trim() != "" }
-
+        
         output:
-        set val({ "$name" != "null" ? "$name" : "$accession_id" }), file("${accession_id}/*fq") optional true into IN_fastq_raw
+        set accession_id, file("*.fastq*") optional true into IN_fastq_raw
 
         script:
         """
-        {
-            echo "Downloading the following accession: ${accession_id}"
-            fasterq-dump ${accession_id} -e ${task.cpus} -p
-            if [ ${params.compress_fastq} = true ]
+        echo "Downloading the following accession: ${accession_id}"
+        fasterq-dump ${accession_id} -e ${task.cpus}
+        if [ ${params.compress_fastq} = true ]
+        then
+            echo "Compressing FastQ files..."
+            if [ -f ${accession_id}_1.fastq ]
             then
-                echo "Compressing FastQ files..."
-                if [ -f ${accession_id}_1.fastq ]
-                then
-                    pigz -p ${task.cpus} ${accession_id}_1.fastq ${accession_id}_2.fastq
-                elif [ -f ${accession_id}_3.fastq ]
-                then
-                    echo "No paired end reads were found to compress."
-                    pigz -p ${task.cpus} ${accession_id}_3.fastq
-                else
-                    echo "FastQ files weren't compressed. Check if FastQ files were downloaded."
-                fi
-            elsenex
-                echo "FastQ files won't be compressed because compress_fastq options was set to: '${params.compress_fastq}.'"
-            fi
-        } || {
-            # If exit code other than 0
-            if [ \$? -eq 0 ]
+                pigz -p ${task.cpus} ${accession_id}_1.fastq ${accession_id}_2.fastq
+            elif [ -f ${accession_id}_3.fastq ]
             then
-                echo "pass" > .status
+                echo "No paired end reads were found to compress."
+                pigz -p ${task.cpus} ${accession_id}_3.fastq
             else
-                echo "fail" > .status
-                echo "Could not download accession $accession_id" > .fail
+                echo "FastQ files weren't compressed. Check if FastQ files were downloaded."
             fi
-        }
+        else
+            echo "FastQ files won't be compressed because compress_fastq options was set to: '${params.compress_fastq}.'"
+        fi
         """
-
         }
     } else {
 
@@ -180,25 +189,6 @@ if (params.fasta){
 }
 
 //OUT_RGI_JSON.set{TO_PARSE}
-
-/*
-process PROCESS_RGI_HEATMAP {
-
-        publishDir "results/rgi_fasta/"
-
-        input:
-        file JSON_FILES from TO_HEATMAP.collect()
-
-        output:
-        file("*.png") optional true
-        file(".svg") optional true
-
-        script:
-        """
-        rgi heatmap -i . --category drug_class --cluster both --debug
-        """
-}
-*/
 
 /*
 process report {
