@@ -74,6 +74,7 @@ if (params.fasta){
     process PROCESS_RGI_HEATMAP {
 
         publishDir "results/rgi_fasta/heatmap"
+        publishDir "results/MultiQC/", pattern: "*.png", mode: "copy"
 
         input:
         file(JSON_HITS) from CARD_HEATMAP.collect()
@@ -115,7 +116,7 @@ if (params.fasta){
     process PROCESS_RGI_FASTA {
 
         tag { sample_id }
-        publishDir "results/rgi_fasta/report"
+        publishDir "results/MultiQC/", pattern: "*.png", mode: "copy"
 
         input:
         file(JSON_FILES) from OUT_RGI_FASTA.collect()
