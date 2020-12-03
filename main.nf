@@ -53,8 +53,8 @@ if (params.fasta){
         val alignmetTool from IN_alignment_fasta
 
         output:
-        file("*card_rgi.txt")
-        file("*_card_rgi_parsed*.json") into OUT_RGI_FASTA
+        file("*card_rgi.json") into CARD_HEATMAP
+        file("*_card_rgi_parsed-count-hits.json") into OUT_RGI_FASTA
 
         script:
         """
@@ -65,27 +65,67 @@ if (params.fasta){
         rgi main --input_sequence ${fasta} --output_file ${sample_id}_card_rgi --input_type contig --alignment_tool ${alignmetTool} --low_quality --include_loose -d wgs --clean -n $task.cpus
         
         rgi parser -i ${sample_id}_card_rgi.json -o ${sample_id}_card_rgi_parsed --include_loose -t contig
+        
+        #clean up work dir, if it exists
+        [[ -d card_temp ]] && rm -r card_temp
         """
     }
 
-    /*
     process PROCESS_RGI_HEATMAP {
 
-        publishDir "results/rgi_fasta/"
+        publishDir "results/rgi_fasta/heatmap"
 
         input:
-        file JSON_FILES from OUT_RGI_FASTA.collect()
+        file(JSON_HITS) from CARD_HEATMAP.collect()
 
         output:
-        file("*.png") optional true
-        file(".svg") optional true
+        file("*.png")
+        file("*.eps")
+        file("*.csv")
+        file(".heatmap_status.txt") into OUT_RGI_HEATMAP
 
         script:
         """
-        rgi heatmap -i . --category drug_class --cluster both --debug
+        # Place card_rgi source in a read/write location for container
+        mkdir card_temp && cp -r /opt/conda/lib/python3.6/site-packages/app/ card_temp
+        export PYTHONPATH="\$(pwd)/card_temp/:\$PATH"
+
+        # generate drug class heatmap
+        rgi heatmap -i . -cat drug_class -o drug_class_heatmap
+        mv drug_class_heatmap*.png drug_class_heatmap.png
+        mv drug_class_heatmap*.eps drug_class_heatmap.eps
+        mv drug_class_heatmap*.csv drug_class_heatmap.csv
+
+        # generate resistance_mechanism heatmap
+        rgi heatmap -i . -cat resistance_mechanism -o resistance_mechanism_heatmap
+        mv resistance_mechanism_heatmap*.png resistance_mechanism_heatmap.png
+        mv resistance_mechanism_heatmap*.eps resistance_mechanism_heatmap.eps
+        mv resistance_mechanism_heatmap*.csv resistance_mechanism_heatmap.csv
+
+        # generate gene_family heatmap
+        rgi heatmap -i . -cat gene_family -o gene_family_heatmap
+        mv gene_family_heatmap*.png gene_family_heatmap.png
+        mv gene_family_heatmap*.eps gene_family_heatmap.eps
+        mv gene_family_heatmap*.csv gene_family_heatmap.csv
+
+        echo "done" > .heatmap_status.txt
         """
     }
-    */
+
+    process PROCESS_RGI_FASTA {
+
+        tag { sample_id }
+        publishDir "results/rgi_fasta/report"
+
+        input:
+        file(JSON_FILES) from OUT_RGI_FASTA.collect()
+
+        output:
+        file("*.png")
+
+        script:
+        template "parse_rgi_json.py"
+    }
 
 
 } else {
@@ -205,3 +245,29 @@ process report {
     template "generate_report.py"
 }
 */
+
+process REPORT {
+
+    publishDir "results/MultiQC/", mode: "copy"
+
+    input:
+    file heatmap_status from OUT_RGI_HEATMAP
+    file jupyter_notebook from Channel.fromPath("${workflow.projectDir}/resources/notebook.ipynb")
+
+    output:
+    file("*html")
+
+    script:
+    """
+    jupyter nbconvert ${jupyter_notebook} --to html --output multiqc_report.html
+    """   
+}
+
+workflow.onComplete {
+
+  // Display complete message
+  log.info "Completed at: " + workflow.complete
+  log.info "Duration    : " + workflow.duration
+  log.info "Success     : " + workflow.success
+  log.info "Exit status : " + workflow.exitStatus
+}
