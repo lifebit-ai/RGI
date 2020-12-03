@@ -80,7 +80,7 @@ if (params.fasta){
         file(JSON_HITS) from CARD_HEATMAP.collect()
 
         output:
-        file("*.png")
+        file("*.png") into OUT_HEATMAP_PNG
         file("*.eps")
         file("*.csv")
         file(".heatmap_status.txt") into OUT_RGI_HEATMAP
@@ -122,7 +122,7 @@ if (params.fasta){
         file(JSON_FILES) from OUT_RGI_FASTA.collect()
 
         output:
-        file("*.png")
+        file("*.png") into OUT_STATS_PNG
 
         script:
         template "parse_rgi_json.py"
@@ -252,17 +252,40 @@ process REPORT {
     publishDir "results/MultiQC/", mode: "copy"
 
     input:
-    file heatmap_status from OUT_RGI_HEATMAP
+    file heatmaps from OUT_HEATMAP_PNG.collect()
+    file out_stats_png from OUT_STATS_PNG
     file jupyter_notebook from Channel.fromPath("${workflow.projectDir}/resources/notebook.ipynb")
 
     output:
-    file("*html")
+    file("*.html") into OUT_REPORT
 
     script:
     """
     jupyter nbconvert ${jupyter_notebook} --to html --output multiqc_report.html
     """   
 }
+
+/*
+process inliner {
+
+    publishDir "results/MultiQC/", mode: "copy"
+
+    input:
+    file heatmaps from OUT_HEATMAP_PNG.collect()
+    file out_stats_png from OUT_STATS_PNG
+    file(html_file) from OUT_REPORT
+
+    output:
+    //file("*.png")
+    file("*.html")
+
+    script:
+    """
+    cp ${workflow.projectDir}/results/MultiQC/* .
+    inliner jupyter_multiqc_report.html > multiqc_report.html
+    """
+}
+*/
 
 workflow.onComplete {
 
