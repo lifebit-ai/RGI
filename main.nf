@@ -261,31 +261,28 @@ process REPORT {
 
     script:
     """
-    jupyter nbconvert ${jupyter_notebook} --to html --output multiqc_report.html
+    jupyter nbconvert ${jupyter_notebook} --to html --output jupyter_multiqc_report.html
     """   
 }
 
-/*
 process inliner {
 
     publishDir "results/MultiQC/", mode: "copy"
 
     input:
-    file heatmaps from OUT_HEATMAP_PNG.collect()
-    file out_stats_png from OUT_STATS_PNG
     file(html_file) from OUT_REPORT
+    file folder from Channel.fromPath("${workflow.projectDir}/results/MultiQC/")
 
     output:
     //file("*.png")
-    file("*.html")
+    //file("*.html")
 
     script:
     """
-    cp ${workflow.projectDir}/results/MultiQC/* .
+    cd ${folder}
     inliner jupyter_multiqc_report.html > multiqc_report.html
     """
 }
-*/
 
 workflow.onComplete {
 
