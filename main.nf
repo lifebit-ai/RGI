@@ -86,6 +86,7 @@ if (params.fasta){
         file(".heatmap_status.txt") into OUT_RGI_HEATMAP
 
         script:
+        /*
         """
         # Place card_rgi source in a read/write location for container
         mkdir card_temp && cp -r /opt/conda/lib/python3.6/site-packages/app/ card_temp
@@ -111,18 +112,20 @@ if (params.fasta){
 
         echo "done" > .heatmap_status.txt
         """
+        */
+        template "process_json_hits.py"
     }
 
     process PROCESS_RGI_FASTA {
 
         tag { sample_id }
-        publishDir "results/MultiQC/", pattern: "*.png", mode: "copy"
+        //publishDir "results/MultiQC/", pattern: "*.png", mode: "copy"
 
         input:
         file(JSON_FILES) from OUT_RGI_FASTA.collect()
 
         output:
-        file("*.png") into OUT_STATS_PNG
+        file("results_summary.html") into OUT_STATS_PNG
 
         script:
         template "parse_rgi_json.py"
@@ -253,7 +256,7 @@ process REPORT {
 
     input:
     file heatmaps from OUT_HEATMAP_PNG.collect()
-    file out_stats_png from OUT_STATS_PNG
+    //file out_stats_png from OUT_STATS_PNG
     file jupyter_notebook from Channel.fromPath("${workflow.projectDir}/resources/notebook.ipynb")
 
     output:
