@@ -89,7 +89,6 @@ if (params.fasta){
     process PROCESS_RGI_FASTA {
 
         tag { sample_id }
-        //publishDir "results/MultiQC/", pattern: "*.png", mode: "copy"
 
         input:
         file(JSON_FILES) from OUT_RGI_FASTA.collect()
@@ -202,10 +201,7 @@ if (params.fasta){
     }
 }
 
-//OUT_RGI_JSON.set{TO_PARSE}
-
-
-process report {
+process REPORT {
 
     publishDir "results/MultiQC/", mode: "copy"
 
@@ -215,29 +211,11 @@ process report {
     file heatmap from PNG_HEATMAP
     
     output:
-    file "report.html" into OUT_REPORT
+    file "*report.html" into OUT_REPORT
 
     script:
     template "generate_report.py"
 }
-
-/*
-process inliner {
-
-    publishDir "results/MultiQC/", mode: "copy"
-
-    input:
-    file(html_file) from OUT_REPORT
-    file folder from Channel.fromPath("${workflow.projectDir}/results/MultiQC/")
-
-
-    script:
-    """
-    cd ${folder}
-    inliner report.html > lala_multiqc_report.html
-    """
-}
-*/
 
 workflow.onComplete {
 
