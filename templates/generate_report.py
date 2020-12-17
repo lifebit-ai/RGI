@@ -65,7 +65,7 @@ def main(summary_file, hits_table, heatmap):
     data_uri = base64.b64encode(open(heatmap, 'rb').read()).decode('utf-8')
     img_tag = '<img src="data:image/png;base64,{0}">'.format(data_uri)
 
-    f = open('report.html','w')
+    f = open('multiqc_report.html','w')
     f.write(html_template.format(summary_table_html, img_tag, hits_table_html))
     f.close()
 
