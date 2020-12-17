@@ -15,6 +15,7 @@ import matplotlib
 from collections import defaultdict, Counter
 import seaborn as sns
 import matplotlib.pyplot as plt
+from pretty_html_table import build_table
 
 __version__ = "0.0.1"
 __build__ = "03.12.2020"
@@ -189,69 +190,33 @@ def main(json_reports):
     # Create dataframe from genes dictionary
     df = pd.DataFrame.from_dict(genes)
 
-    print(df)
+    #print(df)
 
-    # Fixed colourmap values (purple, teal, yellow)
+    # Fixed colourmap values (white, gray-blue, bright blue)
     cmap_values = [0, 1, 2, 3]
-    custom_cmap = matplotlib.colors.ListedColormap(['#4c0057', '#00948f', '#feed00'])
+    custom_cmap = matplotlib.colors.ListedColormap(['#ffffff', '#5a6e92', '#04a0fc'])
     norm = matplotlib.colors.BoundaryNorm(cmap_values, custom_cmap.N)
 
-    # create plot
-
-    sns.heatmap(df, cmap=custom_cmap, cbar=False, norm=norm)
-    sns.set_style("white")
-    plt.savefig("test.png", bbox_inches="tight", format="png", pad_inches=0.5)
-    
-    """
     # Create 3 series, one for each classification type
     class_df1 = create_class_series(drug_class, "drug_class")
     class_df2 = create_class_series(resist_mech, "resistance_mechanism")
     class_df3 = create_class_series(gene_family, "gene_family")
 
-    # Combine the 3 Series into a dataframe with all classification info
-    complete_class_df = pd.concat([class_df1, class_df2, class_df3], axis=1, sort=True)
-    """
-    """
-    #for classification in ["Resistance Mechanism", "Drug Class", "AMR Gene Family"]:
-    for classification in ["drug_class"]:
-        df = create_categories(drug_class, df)
+    # create plot
+    sns.heatmap(df, cmap=custom_cmap, cbar=False, norm=norm)
+    sns.set_style("white")
+    plt.savefig("card_hits_headmap.png", bbox_inches="tight", format="png", pad_inches=0.5)
 
-        complete_class_df= complete_class_df.set_index(["resistance_mechanism", "gene_family"], append=True)["drug_class"].apply(pd.Series).stack()
-        complete_class_df= complete_class_df.reset_index()
-        complete_class_df.columns = ["model_name", "resistance_mechanism", "gene_family", "number", "drug_class"]
-        complete_class_df= complete_class_df.set_index("model_name")
-        complete_class_df= complete_class_df.drop(["number"], axis=1)
-        print(complete_class_df)
+    # create table with classification
 
-        # Create unique identifiers again for the classifications dataframe
-        new_index = []
-        counted = {}
-        for i,v in enumerate(list(complete_class_df.index.values)):
-            if v in counted:
-                counted[v] += 1
-                new_index.append(v+"_"+str(counted[v]))
-            else:
-                counted[v] = 0
-                new_index.append(v+"_0")
+    results_table = pd.concat([df, class_df1, class_df2, class_df3], axis=1, join='inner')
+    results_table = results_table.drop(columns=df.columns).reset_index()
 
-        # Assign new column to dataframe called uID with unique identifiers
-        complete_class_df = complete_class_df.assign(uID=new_index)
-        complete_class_df = complete_class_df.reset_index().set_index("uID")
-        complete_class_df = complete_class_df.sort_values(by=[classification, 'model_name'])
-        s = complete_class_df.loc[:,classification]
-        unique_ids = list(complete_class_df.index.values)
-        df = df.reindex(index=unique_ids)
-        print(df)
-    
-    """
-
-
-    #with open(json_reports) as json_reports_fh:
-    #    df = pd.read_json(json_reports_fh)
-    #print(df)
-
+    html_str = build_table(results_table, "grey_dark")
+    with open("results_hits.html", "w") as html_fh:
+        html_fh.write(html_str)
 
 if __name__ == '__main__':
-    #main(JSON_REPORTS)
-    main(["/Users/inesmendes/lifebit/git/RGI/work/52/e91708f8c8e9d45bbbe1c5628eca9b/GCF_000662585.1_card_rgi.json",
-    "/Users/inesmendes/lifebit/git/RGI/work/52/e91708f8c8e9d45bbbe1c5628eca9b/GCF_902827215.1_SB5881_genomic_card_rgi.json"])
+    main(JSON_REPORTS)
+    #main(["/Users/inesmendes/lifebit/git/RGI/work/52/e91708f8c8e9d45bbbe1c5628eca9b/GCF_000662585.1_card_rgi.json",
+    #"/Users/inesmendes/lifebit/git/RGI/work/52/e91708f8c8e9d45bbbe1c5628eca9b/GCF_902827215.1_SB5881_genomic_card_rgi.json"])

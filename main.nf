@@ -73,46 +73,16 @@ if (params.fasta){
 
     process PROCESS_RGI_HEATMAP {
 
-        publishDir "results/rgi_fasta/heatmap"
         publishDir "results/MultiQC/", pattern: "*.png", mode: "copy"
 
         input:
         file(JSON_HITS) from CARD_HEATMAP.collect()
 
         output:
-        file("*.png") into OUT_HEATMAP_PNG
-        file("*.eps")
-        file("*.csv")
-        file(".heatmap_status.txt") into OUT_RGI_HEATMAP
+        file("results_hits.html") into HTML_TABLE_HITS
+        file("card_hits_headmap.png") into PNG_HEATMAP
 
         script:
-        /*
-        """
-        # Place card_rgi source in a read/write location for container
-        mkdir card_temp && cp -r /opt/conda/lib/python3.6/site-packages/app/ card_temp
-        export PYTHONPATH="\$(pwd)/card_temp/:\$PATH"
-
-        # generate drug class heatmap
-        rgi heatmap -i . -cat drug_class -o drug_class_heatmap
-        mv drug_class_heatmap*.png drug_class_heatmap.png
-        mv drug_class_heatmap*.eps drug_class_heatmap.eps
-        mv drug_class_heatmap*.csv drug_class_heatmap.csv
-
-        # generate resistance_mechanism heatmap
-        rgi heatmap -i . -cat resistance_mechanism -o resistance_mechanism_heatmap
-        mv resistance_mechanism_heatmap*.png resistance_mechanism_heatmap.png
-        mv resistance_mechanism_heatmap*.eps resistance_mechanism_heatmap.eps
-        mv resistance_mechanism_heatmap*.csv resistance_mechanism_heatmap.csv
-
-        # generate gene_family heatmap
-        rgi heatmap -i . -cat gene_family -o gene_family_heatmap
-        mv gene_family_heatmap*.png gene_family_heatmap.png
-        mv gene_family_heatmap*.eps gene_family_heatmap.eps
-        mv gene_family_heatmap*.csv gene_family_heatmap.csv
-
-        echo "done" > .heatmap_status.txt
-        """
-        */
         template "process_json_hits.py"
     }
 
@@ -125,7 +95,7 @@ if (params.fasta){
         file(JSON_FILES) from OUT_RGI_FASTA.collect()
 
         output:
-        file("results_summary.html") into OUT_STATS_PNG
+        file("results_summary.html") into OUT_STATS_SUMMARY
 
         script:
         template "parse_rgi_json.py"
@@ -234,40 +204,24 @@ if (params.fasta){
 
 //OUT_RGI_JSON.set{TO_PARSE}
 
-/*
+
 process report {
-
-    publishDir "${params.outdir}/MultiQC", mode: 'copy'
-
-    input:
-    file json_files from OUT_RGI_PARSE.collect()
-    
-    output:
-    file "multiqc_report.html"
-
-    script:
-    template "generate_report.py"
-}
-*/
-
-process REPORT {
 
     publishDir "results/MultiQC/", mode: "copy"
 
     input:
-    file heatmaps from OUT_HEATMAP_PNG.collect()
-    //file out_stats_png from OUT_STATS_PNG
-    file jupyter_notebook from Channel.fromPath("${workflow.projectDir}/resources/notebook.ipynb")
-
+    file summary_html from OUT_STATS_SUMMARY
+    file html_hit_table from HTML_TABLE_HITS
+    file heatmap from PNG_HEATMAP
+    
     output:
-    file("*.html") into OUT_REPORT
+    file "report.html" into OUT_REPORT
 
     script:
-    """
-    jupyter nbconvert ${jupyter_notebook} --to html --output jupyter_multiqc_report.html
-    """   
+    template "generate_report.py"
 }
 
+/*
 process inliner {
 
     publishDir "results/MultiQC/", mode: "copy"
@@ -276,16 +230,14 @@ process inliner {
     file(html_file) from OUT_REPORT
     file folder from Channel.fromPath("${workflow.projectDir}/results/MultiQC/")
 
-    output:
-    //file("*.png")
-    //file("*.html")
 
     script:
     """
     cd ${folder}
-    inliner jupyter_multiqc_report.html > multiqc_report.html
+    inliner report.html > lala_multiqc_report.html
     """
 }
+*/
 
 workflow.onComplete {
 
