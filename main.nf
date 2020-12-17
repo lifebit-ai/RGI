@@ -88,8 +88,6 @@ if (params.fasta){
 
     process PROCESS_RGI_FASTA {
 
-        tag { sample_id }
-
         input:
         file(JSON_FILES) from OUT_RGI_FASTA.collect()
 
