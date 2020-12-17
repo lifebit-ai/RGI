@@ -186,7 +186,7 @@ if (params.fasta){
         output:
         file("*_mapping_data.txt")
         file("*mapping_stats.txt")
-        set sample_id, file("*.json") into OUT_RGI_JSON_BWT
+        file("*.json") into OUT_RGI_JSON_BWT
 
         script:
         """
@@ -196,6 +196,22 @@ if (params.fasta){
         
         rgi bwt --read_one ${fastq_pair[0]} --read_two ${fastq_pair[0]} --output_file ${sample_id}_rgi_bwt --aligner ${alignmetTool} --clean
         """
+    }
+
+    process PROCESS_RGI_BWT {
+
+
+        input:
+        file JSON_FILES from OUT_RGI_JSON_BWT.collect()
+
+        output:
+        file("results_summary.html") into OUT_STATS_SUMMARY
+        file("results_hits.html") into HTML_TABLE_HITS
+        file("card_hits_headmap.png") into PNG_HEATMAP
+
+        script:
+        template "process_rgi_bwt.py"
+
     }
 }
 

@@ -15,7 +15,6 @@ import matplotlib
 from collections import defaultdict, Counter
 import seaborn as sns
 import matplotlib.pyplot as plt
-from pretty_html_table import build_table
 
 __version__ = "0.0.1"
 __build__ = "03.12.2020"

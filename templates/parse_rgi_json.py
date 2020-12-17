@@ -38,12 +38,6 @@ def main(json_reports):
                             'Strict': int(count_hits_json['Strict']), 
                             'Loose': int(count_hits_json['Loose'])}, ignore_index=True)
     
-    print(df_count_hits)
-
-    # save df to html table for report
-    #str_io = io.StringIO()
-    #df_count_hits.to_html(buf=str_io, classes='table table-striped')
-    #html_str = str_io.getvalue()
     html_str = build_table(df_count_hits, "grey_dark")
     
     with open("results_summary.html", "w") as html_fh:
