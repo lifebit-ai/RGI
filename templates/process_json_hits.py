@@ -10,7 +10,7 @@ import json
 import fnmatch
 import pandas as pd
 import numpy as np
-from pretty_html_table import build_table
+#from pretty_html_table import build_table
 import matplotlib
 from collections import defaultdict, Counter
 import seaborn as sns

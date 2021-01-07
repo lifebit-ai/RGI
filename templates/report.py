@@ -38,12 +38,12 @@ def get_hovertext(df):
 def main(summary_file, hits_table, heatmap):
 
     # load data files
-    #   - summary: number of hits per sample 
+    #   summary: number of hits per sample 
     summary_df = pd.read_csv(summary_file)
-    #   - heatmap: pivot table data
+    #   heatmap: pivot table data
     df_heatmat = pd.read_csv(heatmap)
     df_heatmat = df_heatmat.set_index(df_heatmat.columns[0])
-    #   - hits table: comprehensive results table
+    #   hits table: comprehensive results table
     hits_df = pd.read_csv(hits_table)
     hits_df = hits_df.applymap(convert_tuple)
 
@@ -69,7 +69,7 @@ def main(summary_file, hits_table, heatmap):
                'The application uses reference data from the <a href="https://card.mcmaster.ca/">Comprehensive Antibiotic Resistance Database (CARD)</a>.'
                ' <br>'
                'A total of {0} samples were analysed, detecting a total of {1} unique AMR genes.'
-               ' <br>'.format(len(summary_df.columns[0]), len(hits_df.index)))
+               ' <br>'.format(len(summary_df.index), len(hits_df.index)))
 
     fig.add_annotation(x=0, xref='paper', y=1, yref='paper', text=summary,
                        showarrow=False, font=dict(size=14), align='center', 
@@ -92,7 +92,7 @@ def main(summary_file, hits_table, heatmap):
                         font=dict(size=14), align="center", fill_color="#04a0fc"),
                         cells=dict(values=[hits_df[k].tolist() for k in hits_df.columns[0:]], 
                                     align = "left",  fill_color='#f0f0f0')),
-                row=9, col=1)
+                  row=9, col=1)
     
     # title
     fig.update_layout(title={'text': "<b>RGI-nf Report</b>",
