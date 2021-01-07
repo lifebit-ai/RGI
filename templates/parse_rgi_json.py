@@ -10,7 +10,7 @@ import json
 import fnmatch
 import pandas as pd
 import numpy as np
-from pretty_html_table import build_table
+#from pretty_html_table import build_table
 
 __version__ = "0.0.1"
 __build__ = "03.12.2020"

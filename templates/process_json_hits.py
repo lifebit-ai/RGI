@@ -219,7 +219,6 @@ def main(json_reports):
         html_fh.write(html_str)
     """
 
-
 if __name__ == '__main__':
     main(JSON_REPORTS)
     #main(["/Users/inesmendes/lifebit/git/RGI/work/52/e91708f8c8e9d45bbbe1c5628eca9b/GCF_000662585.1_card_rgi.json",

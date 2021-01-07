@@ -48,14 +48,17 @@ def main(summary_file, hits_table, heatmap):
     hits_df = hits_df.applymap(convert_tuple)
 
     # main report skeleton 
-    fig = make_subplots(rows=8, cols=2, vertical_spacing=0.1, 
-                    specs=[[{"type": "table", "rowspan": 2, "colspan": 2}, None],
+    fig = make_subplots(rows=11, cols=2, vertical_spacing=0.1, 
+                    specs=[[{"type": "table", "rowspan": 1, "colspan": 2}, None],
                            [None, None],
                            [{"type": "table", "rowspan": 2, "colspan": 2}, None],
                            [None, None],
-                           [{"type": "xy", "rowspan":2, "colspan": 2}, None],
+                           [{"type": "xy", "rowspan":4, "colspan": 2}, None],
                            [None, None],
-                           [{"type": "table", "rowspan":2 ,"colspan": 2}, None],
+                           [None, None],
+                           [None, None],
+                           [{"type": "table", "rowspan":3 ,"colspan": 2}, None],
+                           [None, None],
                            [None, None]],
                         subplot_titles=("","Summary Table", "Hits Heatmap", "Hits Table"))
 
@@ -89,7 +92,7 @@ def main(summary_file, hits_table, heatmap):
                         font=dict(size=14), align="center", fill_color="#04a0fc"),
                         cells=dict(values=[hits_df[k].tolist() for k in hits_df.columns[0:]], 
                                     align = "left",  fill_color='#f0f0f0')),
-                row=7, col=1)
+                row=9, col=1)
     
     # title
     fig.update_layout(title={'text': "<b>RGI-nf Report</b>",
@@ -98,11 +101,9 @@ def main(summary_file, hits_table, heatmap):
                             'xanchor': 'center',
                             'yanchor': 'top',
                             'font': {'size': 24, 'color': '#04a0fc'}})
-    fig.show()
+    fig.update_layout(height=1080, template='ggplot2', plot_bgcolor='rgba(0,0,0,0)')
+    fig.write_html("multiqc_report.html")
     
 
 if __name__ == "__main__":
-    #main(SUMMARY_TABLE, HITS_TABLE, HEATMAP)
-    main("../work/d2/d00c5520af3d7ee4144cdb6cb4bf61/results_summary.csv", 
-         "../work/d2/d00c5520af3d7ee4144cdb6cb4bf61/results_hits.csv", 
-         "../work/9d/61c13da64d11bcd7ede06d8941e143/card_hits.csv")
+    main(SUMMARY_TABLE, HITS_TABLE, HEATMAP)

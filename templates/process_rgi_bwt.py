@@ -70,11 +70,14 @@ def main(json_reports):
         }, ignore_index=True)
         
 
+    df_count_hits.to_csv("results_summary.csv", index=False)
 
+    """
     html_str = build_table(df_count_hits, "grey_dark")
     
     with open("results_summary.html", "w") as html_fh:
         html_fh.write(html_str)
+    """
     
     # pivot dataframe
     genes_df = pd.pivot(df_hits, columns='Sample', index='Gene Symbol', values='Hit Type')
@@ -86,6 +89,7 @@ def main(json_reports):
     # drop rows with all zeros in all columns
     genes_df = genes_df.loc[~(genes_df==0).all(axis=1)]
     print(genes_df)
+    genes_df.to_csv("card_hits.csv")
 
     # Fixed colourmap values (white, gray-blue, bright blue)
     cmap_values = [0, 1, 2, 3]
@@ -100,10 +104,13 @@ def main(json_reports):
 
     # create table with classification
     results_table = df_hits.drop(columns=['Sample', 'Hit Type'])
+    results_table.to_csv("results_hits.csv", index=False)
 
+    """
     html_str = build_table(results_table, "grey_dark")
     with open("results_hits.html", "w") as html_fh:
         html_fh.write(html_str)
+    """
 
 if __name__ == '__main__':
     main(JSON_REPORTS)

@@ -205,9 +205,9 @@ if (params.fasta){
         file JSON_FILES from OUT_RGI_JSON_BWT.collect()
 
         output:
-        file("results_summary.html") into OUT_STATS_SUMMARY
-        file("results_hits.html") into HTML_TABLE_HITS
-        file("card_hits_headmap.png") into DF_HEATMAP
+        file("results_summary.csv") into OUT_STATS_SUMMARY
+        file("results_hits.csv") into DF_TABLE_HITS
+        file("card_hits.csv") into DF_HEATMAP
 
         script:
         template "process_rgi_bwt.py"
