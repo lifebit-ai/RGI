@@ -38,10 +38,13 @@ def main(json_reports):
                             'Strict': int(count_hits_json['Strict']), 
                             'Loose': int(count_hits_json['Loose'])}, ignore_index=True)
     
-    html_str = build_table(df_count_hits, "grey_dark")
+    #html_str = build_table(df_count_hits, "grey_dark")
     
-    with open("results_summary.html", "w") as html_fh:
-        html_fh.write(html_str)
+    #with open("results_summary.html", "w") as html_fh:
+        #html_fh.write(html_str)
+
+    # save dataframe for report
+    df_count_hits.to_csv("results_summary.csv", index=False)
 
 if __name__ == '__main__':
     main(JSON_REPORTS)

@@ -43,7 +43,7 @@ def create_categories(class_dict, df):
             idx = new_labels.index(model)
             new_labels[idx] = "%s*" % (model)
 
-    for i,v in enumerate(list(df.index.values)):
+    for i, v in enumerate(list(df.index.values)):
         if v in counted:
             counted[v] += 1
             new_index.append(v+"_"+str(counted[v]))
@@ -188,6 +188,7 @@ def main(json_reports):
 
     # Create dataframe from genes dictionary
     df = pd.DataFrame.from_dict(genes)
+    df.to_csv("card_hits.csv")
 
     #print(df)
 
@@ -206,14 +207,18 @@ def main(json_reports):
     sns.set_style("white")
     plt.savefig("card_hits_headmap.png", bbox_inches="tight", format="png", pad_inches=0.5)
 
-    # create table with classification
+    # create table with classification - DataFrame
 
     results_table = pd.concat([df, class_df1, class_df2, class_df3], axis=1, join='inner')
     results_table = results_table.drop(columns=df.columns).reset_index()
+    results_table.to_csv("results_hits.csv", index=False)
 
+    """
     html_str = build_table(results_table, "grey_dark")
     with open("results_hits.html", "w") as html_fh:
         html_fh.write(html_str)
+    """
+
 
 if __name__ == '__main__':
     main(JSON_REPORTS)

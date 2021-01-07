@@ -133,3 +133,4 @@ results/
 .nextflow.log*
 pipeline_stats.txt*
 .nextflow/
+.DS_Store

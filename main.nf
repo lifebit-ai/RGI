@@ -79,8 +79,8 @@ if (params.fasta){
         file(JSON_HITS) from CARD_HEATMAP.collect()
 
         output:
-        file("results_hits.html") into HTML_TABLE_HITS
-        file("card_hits_headmap.png") into PNG_HEATMAP
+        file("results_hits.csv") into DF_TABLE_HITS
+        file("card_hits.csv") into DF_HEATMAP
 
         script:
         template "process_json_hits.py"
@@ -92,7 +92,7 @@ if (params.fasta){
         file(JSON_FILES) from OUT_RGI_FASTA.collect()
 
         output:
-        file("results_summary.html") into OUT_STATS_SUMMARY
+        file("results_summary.csv") into OUT_STATS_SUMMARY
 
         script:
         template "parse_rgi_json.py"
@@ -207,7 +207,7 @@ if (params.fasta){
         output:
         file("results_summary.html") into OUT_STATS_SUMMARY
         file("results_hits.html") into HTML_TABLE_HITS
-        file("card_hits_headmap.png") into PNG_HEATMAP
+        file("card_hits_headmap.png") into DF_HEATMAP
 
         script:
         template "process_rgi_bwt.py"
@@ -215,6 +215,7 @@ if (params.fasta){
     }
 }
 
+/*
 process REPORT {
 
     publishDir "results/MultiQC/", mode: "copy"
@@ -229,6 +230,23 @@ process REPORT {
 
     script:
     template "generate_report.py"
+}
+*/
+
+process REPORT {
+
+    publishDir "results/MultiQC/", mode: "copy"
+
+    input:
+    file summary_df from OUT_STATS_SUMMARY
+    file hit_table from DF_TABLE_HITS
+    file heatmap_df from DF_HEATMAP
+    
+    output:
+    file "*report.html" into OUT_REPORT
+
+    script:
+    template "report.py"
 }
 
 workflow.onComplete {

@@ -28,6 +28,7 @@ requests
 ruamel-yaml==0.15.87
 scipy 
 seaborn
+plotly
 six 
 statsmodels 
 tornado 
