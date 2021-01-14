@@ -102,7 +102,7 @@ def main(summary_file, hits_table, heatmap):
                             'yanchor': 'top',
                             'font': {'size': 24, 'color': '#04a0fc'}})
     fig.update_layout(height=1080, template='ggplot2', plot_bgcolor='rgba(0,0,0,0)')
-    fig.write_html("multiqc_report.html")
+    fig.write_html("multiqc_report.html", include_plotlyjs="cdn")
     
 
 if __name__ == "__main__":

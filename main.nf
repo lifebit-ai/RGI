@@ -4,7 +4,7 @@ def helpMessage() {
     log.info """
     Usage:
     The typical command for running the pipeline is as follows:
-    nextflow run main.nf --fasta sample.fasta [Options]
+    nextflow run main.nf [Options]
     
     Inputs Options:
     --fastq             Path expression to fastq files.

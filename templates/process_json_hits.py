@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-"""
-Blablabla
-"""
-
 import io
 import os
 import json 
@@ -16,8 +12,8 @@ from collections import defaultdict, Counter
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-__version__ = "0.0.1"
-__build__ = "03.12.2020"
+__version__ = "0.0.2"
+__build__ = "14.01.2021"
 __template__ = "PROCESS_RGI_HEATMAP-nf"
 
 if __file__.endswith(".command.sh"):
