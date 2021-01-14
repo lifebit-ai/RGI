@@ -88,7 +88,7 @@ def main(summary_file, hits_table, heatmap):
                              hoverinfo='text', text=hovertext, showscale=False), row=5, col=1)
     
     # hits table
-    fig.add_trace(go.Table(header=dict(values=["Gene Symbol", "Gene Family", "Drug Class", "Resistance Mechanism"],
+    fig.add_trace(go.Table(header=dict(values=["Gene Symbol", "Gene Family", "Drug Class", "Resistance Mechanism", "ARO Accession"],
                         font=dict(size=14), align="center", fill_color="#04a0fc"),
                         cells=dict(values=[hits_df[k].tolist() for k in hits_df.columns[0:]], 
                                     align = "left",  fill_color='#f0f0f0')),

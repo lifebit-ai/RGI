@@ -215,24 +215,6 @@ if (params.fasta){
     }
 }
 
-/*
-process REPORT {
-
-    publishDir "results/MultiQC/", mode: "copy"
-
-    input:
-    file summary_html from OUT_STATS_SUMMARY
-    file html_hit_table from HTML_TABLE_HITS
-    file heatmap from PNG_HEATMAP
-    
-    output:
-    file "*report.html" into OUT_REPORT
-
-    script:
-    template "generate_report.py"
-}
-*/
-
 process REPORT {
 
     publishDir "results/MultiQC/", mode: "copy"

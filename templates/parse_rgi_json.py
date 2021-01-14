@@ -10,10 +10,9 @@ import json
 import fnmatch
 import pandas as pd
 import numpy as np
-#from pretty_html_table import build_table
 
-__version__ = "0.0.1"
-__build__ = "03.12.2020"
+__version__ = "0.0.2"
+__build__ = "14.01.2021"
 __template__ = "PROCESS_RGI_FASTA-nf"
 
 if __file__.endswith(".command.sh"):
@@ -37,11 +36,6 @@ def main(json_reports):
                             'Perfect': int(count_hits_json['Perfect']), 
                             'Strict': int(count_hits_json['Strict']), 
                             'Loose': int(count_hits_json['Loose'])}, ignore_index=True)
-    
-    #html_str = build_table(df_count_hits, "grey_dark")
-    
-    #with open("results_summary.html", "w") as html_fh:
-        #html_fh.write(html_str)
 
     # save dataframe for report
     df_count_hits.to_csv("results_summary.csv", index=False)

@@ -26,6 +26,7 @@ if __file__.endswith(".command.sh"):
         os.path.basename(__file__)))
     print("JSON_REPORTS: {}".format(JSON_REPORTS))
 
+aro_link_template = '<a href="https://card.mcmaster.ca/aro/{0}">{0}</a>'
 
 def create_categories(class_dict, df):
     """Reformats the dataframe to handle categorization data"""
@@ -71,6 +72,7 @@ def main(json_reports):
     resist_mech = {} # key: gene, value: resistance mechanism
     drug_class = {} # key: gene, value: drug class
     gene_family = {} # key: gene, value: gene family
+    aro = {} # key: gene, value: aro html url link
     excluded = [] # incompletely curated models
 
     for jsonfile in json_reports:
@@ -105,6 +107,10 @@ def main(json_reports):
                             gf = 0
                             dc = 0
                             for entry in value[hsp]["ARO_category"]:
+                                # ARO Accession
+                                aro_accession = [value[hsp]["ARO_category"][entry]["category_aro_accession"]]
+                                aro[value[hsp]["model_name"]] = aro_link_template.format(aro_accession)
+
                                 # Resistance Mechanism classification
                                 if value[hsp]["ARO_category"][entry]["category_aro_class_name"] == "Resistance Mechanism":
                                     rm += 1
@@ -172,7 +178,6 @@ def main(json_reports):
         print("NOTE: %s excluded because it is missing complete categorization information." % (e))
 
     genelist = sorted(genelist)
-    #print(genelist)
 
     # Create a dictionary that will convert type of hit to num. value
     conversion = {"Perfect": 2, "Strict": 1}
@@ -190,8 +195,6 @@ def main(json_reports):
     df = pd.DataFrame.from_dict(genes)
     df.to_csv("card_hits.csv")
 
-    #print(df)
-
     # Fixed colourmap values (white, gray-blue, bright blue)
     cmap_values = [0, 1, 2, 3]
     custom_cmap = matplotlib.colors.ListedColormap(['#ffffff', '#5a6e92', '#04a0fc'])
@@ -201,6 +204,7 @@ def main(json_reports):
     class_df1 = create_class_series(drug_class, "drug_class")
     class_df2 = create_class_series(resist_mech, "resistance_mechanism")
     class_df3 = create_class_series(gene_family, "gene_family")
+    class_aro = create_class_series(aro, "aro_accession")
 
     # create plot
     sns.heatmap(df, cmap=custom_cmap, cbar=False, norm=norm)
@@ -209,17 +213,10 @@ def main(json_reports):
 
     # create table with classification - DataFrame
 
-    results_table = pd.concat([df, class_df1, class_df2, class_df3], axis=1, join='inner')
+    results_table = pd.concat([df, class_df1, class_df2, class_df3, class_aro], axis=1, join='inner')
     results_table = results_table.drop(columns=df.columns).reset_index()
     results_table.to_csv("results_hits.csv", index=False)
 
-    """
-    html_str = build_table(results_table, "grey_dark")
-    with open("results_hits.html", "w") as html_fh:
-        html_fh.write(html_str)
-    """
 
 if __name__ == '__main__':
     main(JSON_REPORTS)
-    #main(["/Users/inesmendes/lifebit/git/RGI/work/52/e91708f8c8e9d45bbbe1c5628eca9b/GCF_000662585.1_card_rgi.json",
-    #"/Users/inesmendes/lifebit/git/RGI/work/52/e91708f8c8e9d45bbbe1c5628eca9b/GCF_902827215.1_SB5881_genomic_card_rgi.json"])
