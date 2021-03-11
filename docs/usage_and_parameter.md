@@ -1,17 +1,4 @@
-# RGI
-
-Antimicrobial resistance gene identification through CARD's Resistance Gene Identifier
-
-## Rationale
-
-This workflow performs *in silico* screening of **antimicrobial resistance genes** in genomic data through [Resistance Gene Identifier (RGI)](https://github.com/arpcard/rgi). This relies on the [Comprehensive Antibiotic Resistance (CARD) Database](https://card.mcmaster.ca/).
-
-## Implementation
-
-Two RGI modes are implemented in this workflow: the `fasta` and the `fastq`. The first receives as input already pre-assembled FASTA sequences, where the second aligns sequence reads (FASTQ) to CARD to make the prediction. The main algorithms implemented in each are:
-
-- fasta: BLAST or DIAMOND (default: DIAMOND)
-- fastq: Bowtie2, bwa or kma (default: kma)
+# Usage and Parameters
 
 ## Requirements
 
@@ -28,12 +15,12 @@ The typical command for running the pipeline is as follows:
                         Input type: path (default: )
     --fasta             Path expression to fasta files.
                         Input type: string (default: )
-    --accessions        Path file with accessions, one perline.
+    --accessions        Path file with accessions, one per line.
                         Input type: path (default: )
 
     FastqDump Options:
     --compress_fastq    If true, downloaded fastqs will be compressed.
-                        Input tupe: boolean (default: true)
+                        Input tuple: boolean (default: true)
 
     RGI Options:
     --alignmentFasta    Specify alignment tool. Options: {DIAMOND,BLAST}
@@ -46,6 +33,11 @@ The typical command for running the pipeline is as follows:
 ### fasta
 
     nextflow run main.nf --fasta="*.fasta"
+
 ### fastq
 
     nextflow run main.nf --fastq="test_data/SRR8886136_{1,2}*"
+
+## Test run
+
+    nextflow run main.nf --profile test
